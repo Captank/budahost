@@ -198,9 +198,80 @@ if [ $? -ne 0 ]; then
 				fi
 			done || exit $?
 
-			echo "${RTAB}Setting up proxy ..."
+			echo "${RTAB}Setting up proxy base"
+			_mkdir "$2/proxy"
 		else
 			_error Invalid _budabot_skeleton parameter count
+		fi
+	}
+fi
+
+type _acquire_lock > /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+	# 1 = directory NAME representing the lock
+	function _acquire_lock {
+		if [ $# -eq 1 ]; then
+			local i
+			for i in 1 2 3; do
+				if mkdir "$HOST_DIR/.locks/$1" > /dev/null 2> /dev/null; then
+					break
+				else
+					if [ $i -eq 3 ]; then
+						_error Failed to acquire lock, you may have to remove $1 manually
+					else
+						sleep 1
+					fi
+				fi
+			done
+		else
+			_error Invalid _acquire_lock parameter count
+		fi
+	}
+fi
+
+type _release_lock > /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+        # 1 = directory NAME representing the lock
+        function _release_lock {
+		if [ $# -eq 1 ]; then
+			if [ -e "$HOST_DIR/.locks/$1" ]; then
+				if [ -d "$HOST_DIR/.locks/$1" ]; then
+					rmdir "$HOST_DIR/.locks/$1" || _error Could not release lock $1
+				else
+					_error $1 does not seem to be a lock
+				fi
+			else
+				_error Lock for $1 does not exist
+			fi
+		else
+			_error Invalid _release_lock parameter count
+		fi
+	}
+fi
+
+type _register_port > /dev/null 2> /dev/null
+if [ $? -ne 0 ]; then
+	# 1 = usage hint in form of $config_file#(api|proxy)
+	# stores the port in REGISTERED_PORT
+	function _register_port {
+		if [ $# -eq 1 ]; then
+			_acquire_lock port || exit $?
+			local port
+			port=`grep ":$1" "$HOST_DIR/port_handler/port.list"`
+			if [ $? -eq 0 ]; then
+				REGISTERED_PORT=`echo "$port" | grep -oP "\\d+"`
+			else
+				port=`tail -1 "$HOST_DIR/port_handler/port.list" | grep -oP "\\d+"`
+				if [ $? -eq 1 ]; then
+					REGISTERED_PORT=`cat "$HOST_DIR/port_handler/port.base"`
+				else
+					REGISTERED_PORT=`expr $port + 1`
+				fi
+				echo "${REGISTERED_PORT}:$1" >> "$HOST_DIR/port_handler/port.list"
+			fi
+			_release_lock port || exit $?
+		else
+			_error Invalid _register_port parameter cout
 		fi
 	}
 fi

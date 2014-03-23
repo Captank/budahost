@@ -33,12 +33,23 @@ echo "Installing chat proxy ..."
 PROXY_DIR="$HOST_USER_HOME/proxy"
 # getting files
 _zip_install http://budabot2.googlecode.com/files/aochatproxy1.1.zip "$PROXY_DIR" 1
-echo -e "${PROXY_PORT_BASE}\n" > "$PROXY_DIR/port.base"
-touch "$PROXY_DIR/port.list"
 # set permissions
 _chmod_rec "$PROXY_DIR"
 _chmod_script "$PROXY_DIR/start.sh"
-chmod 660 "$PROXY_DIR/port.list"
+echo -e "${TAB}done.\n"
+
+echo "Installing port handling ..."
+PORT_DIR="$HOST_USER_HOME/port_handler"
+_mkdir "$PORT_DIR"
+echo "$PORT_BASE" > "$PORT_DIR/port.base"
+touch "$PORT_DIR/port.list"
+# set permissions
+chmod 660 "$PORT_DIR/port.list"
+echo -e "${TAB}done.\n"
+
+echo "Setting up lock directory ..."
+_mkdir "$HOST_USER_HOME/.locks"
+chmod 770 "$HOST_USER_HOME/.locks"
 echo -e "${TAB}done.\n"
 
 echo "Preparing scripts ..."
@@ -53,7 +64,6 @@ done || exit $?
 cp "$INSTALL_DIR/functions.sh" "$HOST_USER_HOME/functions.sh"
 cp "$INSTALL_DIR/header.sh" "$HOST_USER_HOME/header.sh"
 find "$HOST_USER_HOME" -maxdepth 1 -type f -name "*.sh" -print0 | xargs -0 chmod $HOST_SCRIPT_MASK
-#chmod 750 "$HOST_USER_HOME/*.sh"
 echo -e "${TAB}done.\n"
 
 echo "Setting owner and owning group ..."

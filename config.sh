@@ -12,7 +12,7 @@ INSTALL_REPO_DIR=$INSTALL_DIR/repos
 
 REQUIRED_PACKAGES=(php5-cli php5-mysql php5-sqlite screen openjdk-7-jre mysql-server git wget unzip)
 
-PROXY_PORT_BASE=17250
+PORT_BASE=17250
 
 TAB="    "
 RTAB=""
