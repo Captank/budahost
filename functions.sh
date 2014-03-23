@@ -214,6 +214,7 @@ if [ $? -ne 0 ]; then
 			local i
 			for i in 1 2 3; do
 				if mkdir "$HOST_DIR/.locks/$1" > /dev/null 2> /dev/null; then
+					echo $$ > "$HOST_DIR/.locks/$1/.owner"
 					break
 				else
 					if [ $i -eq 3 ]; then
@@ -236,7 +237,10 @@ if [ $? -ne 0 ]; then
 		if [ $# -eq 1 ]; then
 			if [ -e "$HOST_DIR/.locks/$1" ]; then
 				if [ -d "$HOST_DIR/.locks/$1" ]; then
-					rmdir "$HOST_DIR/.locks/$1" || _error Could not release lock $1
+					if [ $$ -eq `cat "$HOST_DIR/.locks/$1/.owner"` ]; then
+						rm "$HOST_DIR/.locks/$1/.owner"
+						rmdir "$HOST_DIR/.locks/$1" || _error Could not release lock $1
+					fi
 				else
 					_error $1 does not seem to be a lock
 				fi
