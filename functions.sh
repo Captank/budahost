@@ -4,7 +4,6 @@ type _error > /dev/null 2> /dev/null
 if [ $? -ne 0 ]; then
 	function _error {
 		echo -e "${RTAB}ERROR! ${@}!\n\nFAILED!\n\n"
-		BREAK=1
 		exit 1
 	}
 fi
