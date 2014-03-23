@@ -99,11 +99,18 @@ if [ $? -ne 0 ]; then
 					_error $1 is not a file
 				fi
 			fi
-			echo "copy tpl $1 to $2"
+			if [ -e "$2" ]; then
+				if [ -d "$2" ]; then
+					_error $1 is a directory
+				else
+					rm "$2"
+				fi
+			fi
+
 			local line
 			while read line; do
 				line=${line//~~~HOST_USER_HOME~~~/"$HOST_USER_HOME"}
-				echo "tpl: $line"
+				echo "$line" >> "$2"
 			done < "$1"
 		else
 			_error Invalid _cp_tpl parameter count 

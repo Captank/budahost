@@ -42,9 +42,13 @@ chmod 660 "$PROXY_DIR/port.list"
 echo -e "${TAB}done.\n"
 
 echo "Preparing scripts ..."
-find "$INSTALL_SCRIPTS_DIR" -type f -name "*.sh" | while read file; do
+find "$INSTALL_SCRIPTS_DIR" -maxdepth 1 -type f -name "*.sh" | while read file; do
 	file=`basename "$file"`
-	_cp_tpl "$INSTALL_SCRIPTS_DIR/$file" "$HOST_USER_HOME/$file"
+	cp "$INSTALL_SCRIPTS_DIR/$file" "$HOST_USER_HOME/$file"
+done
+find "$INSTALL_SCRIPTS_DIR/tpl" -type f -name "*.sh" | while read file; do
+	file=`basename "$file"`
+	_cp_tpl "$INSTALL_SCRIPTS_DIR/tpl/$file" "$HOST_USER_HOME/$file"
 done || exit $?
 cp "$INSTALL_DIR/functions.sh" "$HOST_USER_HOME/functions.sh"
 cp "$INSTALL_DIR/header.sh" "$HOST_USER_HOME/header.sh"
