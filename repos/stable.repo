@@ -1,0 +1,9 @@
+_zip_install http://budabot2.googlecode.com/files/Budabot3.0_GA_build1303251942_linux.zip "$REPO_DIR" 1
+echo "${RTAB}${TAB}extras ..."
+_mkdir "$REPO_DIR/extras"
+_git_clone git://github.com/Captank/RULES_MODULE.git "$REPO_DIR/extras/RULES_MODULE" stable
+echo "${RTAB}${TAB}${TAB}done."
+echo "${RTAB}${TAB}permissions ..."
+_chmod_rec "$REPO_DIR"
+_chmod_script "$REPO_DIR/chatbot.sh"
+echo "${RTAB}${TAB}${TAB}done."
