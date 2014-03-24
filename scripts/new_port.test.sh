@@ -3,7 +3,7 @@
 # test script for port stuff #
 ##############################
 
-source /home/budabot/config.sh
+source "~~~HOST_USER_HOME~~~/config.sh"
 source "$HOST_DIR/functions.sh"
 
 source "$HOST_DIR/header.sh"

@@ -3,7 +3,7 @@
 # script to initialize budabot repo skeletons #
 ###############################################
 
-source /home/budabot/config.sh
+source "~~~HOST_USER_HOME~~~/config.sh"
 source "$HOST_DIR/functions.sh"
 
 source "$HOST_DIR/header.sh"

@@ -122,12 +122,15 @@ if ! type _cp_tpl > /dev/null 2> /dev/null; then
 					rm "$2"
 				fi
 			fi
-
-			local line
-			while read line; do
-				line=${line//~~~HOST_USER_HOME~~~/"$HOST_USER_HOME"}
-				echo "$line" >> "$2"
-			done < "$1"
+	
+			local toexport
+			local var
+			toexport=(HOST_USER_HOME)
+			for var in "${toexport[@]}"; do
+				export $var
+			done
+			local php_out
+			php_out=`php -f "$INSTALL_DIR/replace.php" -- "$1" "$2"` || _error Template error in $1:  $php_out
 		else
 			_error Invalid _cp_tpl parameter count 
 		fi
