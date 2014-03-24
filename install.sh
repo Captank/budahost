@@ -3,10 +3,34 @@
 # host installation routine #
 #############################
 
-source ./config.sh
-source $INSTALL_DIR/functions.sh
+# retriving the location of this script
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
 
-source $INSTALL_DIR/header.sh
+SOURCE_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+unset SOURCE; unset DIR
+
+# checking if setup is complete
+if [ ! -f "$SOURCE_DIR/header.sh" ]; then
+	echo -e "ERROR! $SOURCE_DIR/header.sh is missing!\nFAILED\n\n"
+	exit 1
+fi
+source "$SOURCE_DIR/header.sh"
+
+if [ ! -f "$SOURCE_DIR/functions.sh" ]; then
+	echo -e "ERROR! $SOURCE_DIR/functions.sh is missing!\nFAILED\n\n"
+	exit 1
+fi
+source "$SOURCE_DIR/functions.sh"
+
+_check "$SOURCE_DIR/config.sh" -d
+
+exit 0
+source ./config.sh
 
 echo "Processing requirements ..."
 _install ${REQUIRED_PACKAGES[@]}

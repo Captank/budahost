@@ -13,6 +13,18 @@ if ! type _error > /dev/null 2> /dev/null; then
 	}
 fi
 
+if ! type _check > /dev/null 2> /dev/null; then
+	# function to check if file or directory exists
+	# 1 = path to file/directory
+	# 2 = file type, -d for directory, -f for files
+	# breaks if parameter count is invalid or check failed
+	function _check {
+		if [ ! $2 "$1" ]; then
+			 _error File type check on $1 failed
+		fi
+	}
+fi
+
 if ! type _install > /dev/null 2> /dev/null; then
 	# function to install packages if they are not installed yet
 	# all parameters represent a package name
