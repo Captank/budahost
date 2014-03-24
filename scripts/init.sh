@@ -1,3 +1,8 @@
+#!/bin/bash
+###############################################
+# script to initialize budabot repo skeletons #
+###############################################
+
 source /home/budabot/config.sh
 source "$HOST_DIR/functions.sh"
 

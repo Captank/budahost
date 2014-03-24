@@ -1,15 +1,22 @@
 #!/bin/bash
+#########################################
+# script to define all needed functions #
+#########################################
 
-type _error > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
+if ! type _error > /dev/null 2> /dev/null; then
+	# function for formated error message
+	# all parameters are simply printed separated by a space
+	# breaks the script always
 	function _error {
 		echo -e "${RTAB}ERROR! ${@}!\n\nFAILED!\n\n"
 		exit 1
 	}
 fi
 
-type _install > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
+if ! type _install > /dev/null 2> /dev/null; then
+	# function to install packages if they are not installed yet
+	# all parameters represent a package name
+	# breaks if package install failed
 	function _install {
 		for pkg in "${@}"; do
 			dpkg-query -l $pkg > /dev/null 2> /dev/null
@@ -22,9 +29,12 @@ if [ $? -ne 0 ]; then
 fi
 
 
-type _git_clone > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = url, 2 = directory[, 3 = branch ]
+if ! type _git_clone > /dev/null 2> /dev/null; then
+	# function to clone a repository, if it doesnt exist already
+	# 1 = url to repository (e.g. git://github.com/Budabot/Budabot.git)
+	# 2 = repository directory (e.g. /home/budabot/nightly.repo)
+	# optional 3 = branch name
+	# breaks if $2 exists, but is not a repository or cloning failed, or the parameter count is invalid
 	function _git_clone {
 		if [ $# -eq 2 ] || [ $# -eq 3 ]; then
 			if [ -e "$2" ]; then
@@ -44,9 +54,12 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _zip_install > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 ) url, 2 = directory, 3 = 0 -> no inner directory, 1 -> inner directory
+if ! type _zip_install > /dev/null 2> /dev/null; then
+	# function to download and extract a zip file to a specific directory
+	# 1 = url to the zip file (e.g. http://www.googlecode.com/Budabot/budabot_3.0_GA_linux_12345567.zip)
+	# 2 = directory to extract the zip file to (e.g. /home/budabot/stable.repo)
+	# 3 = defines if the zip file contains a directory which contains the relevant files, value 0 = no inner directory, value 1 = inner diretory
+	# breaks if $2 exists but is not a directory, the download and extraction process failed or the parameter count is invalid
 	function _zip_install {
 		if [ $# -eq 3 ]; then
 			if [ -e "$2" ]; then
@@ -58,9 +71,9 @@ if [ $? -ne 0 ]; then
 				local tmpdir
 				local inner
 				if [ $3 -eq 0 ]; then
-					tmpzip=`mktemp --dry-run` && wget -O $tmpzip "$1" && tmpdir=`mktemp -d` && unzip $tmpzip -d $tmpdir && rm $tmpzip && mv $tmpdir "$2"
+					tmpzip=`mktemp --dry-run` && wget -O $tmpzip "$1" && tmpdir=`mktemp -d` && unzip $tmpzip -d $tmpdir && rm $tmpzip && mv $tmpdir "$2" || _error Failed to process the zip file $1
 				else
-					tmpzip=`mktemp --dry-run` && wget -O $tmpzip "$1" && tmpdir=`mktemp -d` && unzip $tmpzip -d $tmpdir && rm $tmpzip && inner=`ls $tmpdir` && mv $tmpdir/$inner "$2" && rmdir $tmpdir
+					tmpzip=`mktemp --dry-run` && wget -O $tmpzip "$1" && tmpdir=`mktemp -d` && unzip $tmpzip -d $tmpdir && rm $tmpzip && inner=`ls $tmpdir` && mv $tmpdir/$inner "$2" && rmdir $tmpdir || _error Failed to process the zip file $1
 				fi
 			fi
 		else
@@ -69,9 +82,10 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _mkdir > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = directory
+if ! type _mkdir > /dev/null 2> /dev/null; then
+	# function to create a directory
+	# 1 = directory to create (e.g. /home/budabot/nightly.repo/extras)
+	# breaks when $2 exists but is not a directory, the mkdir failed or the parameter count is invalid
 	function _mkdir {
 		if [ $# -eq 1 ]; then
 			if [ -e "$1" ]; then
@@ -87,9 +101,11 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _cp_tpl > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = source file, 2 = dest file
+if ! type _cp_tpl > /dev/null 2> /dev/null; then
+	# function to copy a template file and replace the place holders with correct values, if the destionation exists it will be deleted first
+	# 1 = source template file (e.g. /root/budahost/scripts/config.sh)
+	# 2 = destination file (e.g. /home/budabot/config.sh)
+	# breaks if $1 is not a file or does not exist, $2 exists but is not a file, or the parameter count is invalid
 	function _cp_tpl {
 		if [ $# -eq 2 ]; then
 			if [ ! -e "$1" ]; then
@@ -118,9 +134,10 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _chmod_rec > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = directory
+if ! type _chmod_rec > /dev/null 2> /dev/null; then
+	# function to recursively set file permissions, it uses $HOST_DIR_MASK and $HOST_FILE_MASK
+	# 1 = directory to apply file permissions
+	# breaks if parameter count is invalid
 	function _chmod_rec {
 		if [ $# -eq 1 ]; then
 			find "$1" -type d -print0 | xargs -0 chmod $HOST_DIR_MASK
@@ -131,9 +148,10 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _chmod_script > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1, ..., n = file
+if ! type _chmod_script > /dev/null 2> /dev/null; then
+	# function to set script file permission as defined in $HOST_SCRIPT_MASK
+	# all parameters represent file locations (e.g. /home/budabot/nightly.repo/chatbot.sh)
+	# breaks if chmod fails
 	function _chmod_script {
 		for file in "${@}"; do
 			chmod "$HOST_SCRIPT_MASK" "$file" || _error Could not set file permissions for $file
@@ -141,9 +159,11 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _ln > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = sorce, 2 = dest
+if ! type _ln > /dev/null 2> /dev/null; then
+	# function to create sym links
+	# 1 = source path (e.g. /home/budabot/nightly.repo/chatbot.sh)
+	# 2 = sym link location (e.g. /home/user/budabot/nightly.repo/chatbot.sh)
+	# breaks if $1 does not exist, $2 exists but is not a symlink, $2 exists and is a symlink but does not point to $1, ln fails or invalid parameter count
 	function _ln {
 		if [ $# -eq 2 ]; then
 			if [ ! -e "$1" ]; then
@@ -162,16 +182,18 @@ if [ $? -ne 0 ]; then
 					_error Sym link destination $2 already exists, but is not a sym link
 				fi
 			fi
-			ln -s "$1" "$2"
+			ln -s "$1" "$2" || _error Failed to create symlink $2 pointing to $1
 		else
 			_error Invalid _ln parameter count
 		fi
 	}
 fi
 
-type _budabot_skeleton > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = source repo, 2 = dest repo
+if ! type _budabot_skeleton > /dev/null 2> /dev/null; then
+	# function to create the budabot skeleton
+	# 1 = source repository directory (e.g. /home/budabot/nightly.repo)
+	# 2 = destination skeleton directory (e.g. /home/user/budabot/nightly.repo)
+	# breaks if _mkdir or _ln fails, or invalid parameter count
 	function _budabot_skeleton {
 		if [ $# -eq 2 ]; then
 			local target
@@ -206,9 +228,10 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _acquire_lock > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
-	# 1 = directory NAME representing the lock
+if ! type _acquire_lock > /dev/null 2> /dev/null; then
+	# function to acquire a lock
+	# 1 = name of lock, this must be a valid directory name (e.g. port)
+	# breaks if it can not acquire the lock, or the parameter count is invalid
 	function _acquire_lock {
 		if [ $# -eq 1 ]; then
 			local i
@@ -230,16 +253,20 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _release_lock > /dev/null 2> /dev/null
+if ! type _release_lock > /dev/null 2> /dev/null; then
 if [ $? -ne 0 ]; then
-        # 1 = directory NAME representing the lock
+	# function to release the acquired lock
+        # 1 = name of lock, this must be a valid directory name (e.g. port)
+	# breaks if lock does not exist, $1 does not seem to be a lock, the process is not the owner of the lock, releasing lock failed or invalid parameter count
         function _release_lock {
 		if [ $# -eq 1 ]; then
 			if [ -e "$HOST_DIR/.locks/$1" ]; then
 				if [ -d "$HOST_DIR/.locks/$1" ]; then
 					if [ $$ -eq `cat "$HOST_DIR/.locks/$1/.owner"` ]; then
-						rm "$HOST_DIR/.locks/$1/.owner"
-						rmdir "$HOST_DIR/.locks/$1" || _error Could not release lock $1
+						rm "$HOST_DIR/.locks/$1/.owner" || _error Releasing lock $1 failed
+						rmdir "$HOST_DIR/.locks/$1" || _error Releasing lock $1 failed
+					else
+						_error Not owner of the lock
 					fi
 				else
 					_error $1 does not seem to be a lock
@@ -253,10 +280,10 @@ if [ $? -ne 0 ]; then
 	}
 fi
 
-type _register_port > /dev/null 2> /dev/null
-if [ $? -ne 0 ]; then
+if ! type _register_port > /dev/null 2> /dev/null; then
+	# function to register a port, the new port will be stored in $REGISTERED_PORT
 	# 1 = usage hint in form of $config_file#(api|proxy)
-	# stores the port in REGISTERED_PORT
+	# breaks if it can not acquire or release the lock, or the parameter count is invalid
 	function _register_port {
 		if [ $# -eq 1 ]; then
 			_acquire_lock port || exit $?

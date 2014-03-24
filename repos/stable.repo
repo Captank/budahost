@@ -1,3 +1,8 @@
+#!/bin/bash
+###############################
+# stable.repo install routine #
+###############################
+
 _zip_install http://budabot2.googlecode.com/files/Budabot3.0_GA_build1303251942_linux.zip "$REPO_DIR" 1
 echo "${RTAB}${TAB}extras ..."
 _mkdir "$REPO_DIR/extras"
