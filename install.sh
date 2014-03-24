@@ -27,7 +27,7 @@ if [ ! -f "$SOURCE_DIR/functions.sh" ]; then
 fi
 source "$SOURCE_DIR/functions.sh"
 
-_check "$SOURCE_DIR/config.sh" -d
+_check "$SOURCE_DIR/config.sh" -f
 
 exit 0
 source ./config.sh

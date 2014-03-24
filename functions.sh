@@ -20,7 +20,7 @@ if ! type _check > /dev/null 2> /dev/null; then
 	# breaks if parameter count is invalid or check failed
 	function _check {
 		if [ ! $2 "$1" ]; then
-			 _error File type check on $1 failed
+			 _error File type check on "$1" failed
 		fi
 	}
 fi
@@ -34,7 +34,7 @@ if ! type _install > /dev/null 2> /dev/null; then
 			dpkg-query -l $pkg > /dev/null 2> /dev/null
 			if [ $? -eq 1 ]; then
 				echo "Package '$pkg' needed, installing ..."
-				apt-get install $pkg ||	_error Could not install $pkg
+				apt-get install "$pkg" || _error Could not install "$pkg"
 			fi
 		done
 	}
@@ -51,7 +51,7 @@ if ! type _git_clone > /dev/null 2> /dev/null; then
 		if [ $# -eq 2 ] || [ $# -eq 3 ]; then
 			if [ -e "$2" ]; then
 				if [ ! -d "$2/.git" ]; then
-					_error $2 does exist, but is not a git repository
+					_error "$2" does exist, but is not a git repository
 				fi
 			else
 				if [ $# -eq 2 ]; then
@@ -76,16 +76,16 @@ if ! type _zip_install > /dev/null 2> /dev/null; then
 		if [ $# -eq 3 ]; then
 			if [ -e "$2" ]; then
 				if [ ! -d "$2" ]; then
-					_error $2 does exist, but is not a directory
+					_error "$2" does exist, but is not a directory
 				fi
 			else
 				local tmpzip
 				local tmpdir
 				local inner
 				if [ $3 -eq 0 ]; then
-					tmpzip=`mktemp --dry-run` && wget -O $tmpzip "$1" && tmpdir=`mktemp -d` && unzip $tmpzip -d $tmpdir && rm $tmpzip && mv $tmpdir "$2" || _error Failed to process the zip file $1
+					tmpzip=`mktemp --dry-run` && wget -O "$tmpzip" "$1" && tmpdir=`mktemp -d` && unzip "$tmpzip" -d "$tmpdir" && rm "$tmpzip" && mv "$tmpdir" "$2" || _error Failed to process the zip file "$1"
 				else
-					tmpzip=`mktemp --dry-run` && wget -O $tmpzip "$1" && tmpdir=`mktemp -d` && unzip $tmpzip -d $tmpdir && rm $tmpzip && inner=`ls $tmpdir` && mv $tmpdir/$inner "$2" && rmdir $tmpdir || _error Failed to process the zip file $1
+					tmpzip=`mktemp --dry-run` && wget -O "$tmpzip" "$1" && tmpdir=`mktemp -d` && unzip "$tmpzip" -d "$tmpdir" && rm "$tmpzip" && inner=`ls $tmpdir` && mv "$tmpdir/$inner" "$2" && rmdir "$tmpdir" || _error Failed to process the zip file "$1"
 				fi
 			fi
 		else
@@ -102,10 +102,10 @@ if ! type _mkdir > /dev/null 2> /dev/null; then
 		if [ $# -eq 1 ]; then
 			if [ -e "$1" ]; then
 				if [ ! -d "$1" ]; then
-					_error $1 must be a directory
+					_error "$1" must be a directory
 				fi
 			else
-				mkdir "$1" || _error Could not create directory $1
+				mkdir "$1" || _error Could not create directory "$1"
 			fi
 		else
 			_error Invalid _mkdir parameter count
@@ -269,7 +269,6 @@ if ! type _acquire_lock > /dev/null 2> /dev/null; then
 fi
 
 if ! type _release_lock > /dev/null 2> /dev/null; then
-if [ $? -ne 0 ]; then
 	# function to release the acquired lock
         # 1 = name of lock, this must be a valid directory name (e.g. port)
 	# breaks if lock does not exist, $1 does not seem to be a lock, the process is not the owner of the lock, releasing lock failed or invalid parameter count
